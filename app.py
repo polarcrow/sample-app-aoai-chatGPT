@@ -4,7 +4,6 @@ import logging
 import requests
 import openai
 from flask import Flask, Response, request, jsonify
-from tenacity import retry, wait_random_exponential, stop_after_attempt  
 from azure.search.documents.models import Vector
 from dotenv import load_dotenv
 
@@ -45,7 +44,6 @@ AZURE_OPENAI_MODEL_NAME = os.environ.get("AZURE_OPENAI_MODEL_NAME", "gpt-35-turb
 
 SHOULD_STREAM = True if AZURE_OPENAI_STREAM.lower() == "true" else False
 
-@retry(wait=wait_random_exponential(min=1, max=20), stop=stop_after_attempt(6))
 # Function to generate embeddings for title and content fields, also used for query embeddings
 def generate_embeddings(text):
     response = openai.Embedding.create(
