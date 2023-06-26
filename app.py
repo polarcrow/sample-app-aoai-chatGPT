@@ -65,12 +65,12 @@ def should_use_data():
 
 def prepare_body_headers_with_data(request):
     request_messages = request.json["messages"]
-    embedding = generate_embeddings(request_messages)
-    vec = Vector(
-        value = embedding,
-        k = 5,
-        fields="contentVector"
-    )
+    #embedding = generate_embeddings(request_messages)
+    #vec = Vector(
+    #    value = embedding,
+    #    k = 5,
+    #    fields="contentVector"
+    #)
     body = {
         "messages": request_messages,
         "temperature": float(AZURE_OPENAI_TEMPERATURE),
@@ -98,7 +98,8 @@ def prepare_body_headers_with_data(request):
                     "queryLanguage": "fr-fr",
                     "semanticConfiguration": AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG if AZURE_SEARCH_USE_SEMANTIC_SEARCH.lower() == "true" and AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG else "",
                     "roleInformation": AZURE_OPENAI_SYSTEM_MESSAGE,
-                    "vector": vec
+                    #"vector": vec,
+                    "answers": "extractive
                 }
             }
         ]
