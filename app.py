@@ -4,6 +4,8 @@ import logging
 import requests
 import openai
 from flask import Flask, Response, request, jsonify
+from tenacity import retry, wait_random_exponential, stop_after_attempt  
+from azure.search.documents.models import Vector
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -43,6 +45,14 @@ AZURE_OPENAI_MODEL_NAME = os.environ.get("AZURE_OPENAI_MODEL_NAME", "gpt-35-turb
 
 SHOULD_STREAM = True if AZURE_OPENAI_STREAM.lower() == "true" else False
 
+@retry(wait=wait_random_exponential(min=1, max=20), stop=stop_after_attempt(6))
+# Function to generate embeddings for title and content fields, also used for query embeddings
+def generate_embeddings(text):
+    response = openai.Embedding.create(
+        input=text, engine="test_souha2")
+    embeddings = response['data'][0]['embedding']
+    return embeddings
+
 def is_chat_model():
     if 'gpt-4' in AZURE_OPENAI_MODEL_NAME.lower() or AZURE_OPENAI_MODEL_NAME.lower() in ['gpt-35-turbo-4k', 'gpt-35-turbo-16k']:
         return True
@@ -55,6 +65,12 @@ def should_use_data():
 
 def prepare_body_headers_with_data(request):
     request_messages = request.json["messages"]
+    embedding = generate_embeddings(request_messages)
+    vec = Vector(
+        value = embedding,
+        k = 5,
+        fields="contentVector"
+    )
     body = {
         "messages": request_messages,
         "temperature": float(AZURE_OPENAI_TEMPERATURE),
@@ -66,10 +82,9 @@ def prepare_body_headers_with_data(request):
             {
                 "type": "AzureCognitiveSearch",
                 "parameters": {
-                    "endpoint": f"https://{AZURE_SEARCH_SERVICE}.search.windows.net/indexes/{AZURE_SEARCH_INDEX}/docs/search?api-version=2020-06-30-Preview",
+                    "endpoint": f"https://{AZURE_SEARCH_SERVICE}.search.windows.net",
                     "key": AZURE_SEARCH_KEY,
                     "indexName": AZURE_SEARCH_INDEX,
-                    "version": "2020-06-30-Preview",
                     "fieldsMapping": {
                         "contentField": AZURE_SEARCH_CONTENT_COLUMNS.split("|") if AZURE_SEARCH_CONTENT_COLUMNS else [],
                         "titleField": AZURE_SEARCH_TITLE_COLUMN if AZURE_SEARCH_TITLE_COLUMN else None,
@@ -84,7 +99,8 @@ def prepare_body_headers_with_data(request):
                     "roleInformation": AZURE_OPENAI_SYSTEM_MESSAGE,
                     "answers": "extractive|threshold-0.001|count-3",
                     "captions": "extractive",
-                    "count": "true"
+                    "count": "true",
+                    "vector": vec
                 }
             }
         ]
