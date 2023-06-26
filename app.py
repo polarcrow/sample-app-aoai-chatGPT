@@ -62,8 +62,11 @@ def should_use_data():
     return False
 
 def prepare_body_headers_with_data(request):
+    print("PREPARING BODY HEADERS")
     request_messages = request.json["messages"]
+    print("COMPUTING EMBEDDING")
     embedding = generate_embeddings(request_messages)
+    print("COMPUTED EMBEDDING")
     vec = Vector(
         value = embedding,
         k = 5,
@@ -97,7 +100,6 @@ def prepare_body_headers_with_data(request):
                     "roleInformation": AZURE_OPENAI_SYSTEM_MESSAGE,
                     "answers": "extractive|threshold-0.001|count-3",
                     "captions": "extractive",
-                    "count": "true",
                     "vector": vec
                 }
             }
