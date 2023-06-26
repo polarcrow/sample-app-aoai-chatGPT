@@ -4,8 +4,9 @@ import logging
 import requests
 import openai
 from flask import Flask, Response, request, jsonify
+from tenacity import retry, wait_random_exponential, stop_after_attempt  
 from dotenv import load_dotenv
-from azure.search.documents._generated.models._models_py3 import Vector
+from azure.search.documents.models import Vector
 
 load_dotenv()
 
