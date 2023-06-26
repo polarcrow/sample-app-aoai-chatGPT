@@ -4,7 +4,6 @@ import logging
 import requests
 import openai
 from flask import Flask, Response, request, jsonify
-from azure.search.documents.models import Vector
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -44,13 +43,6 @@ AZURE_OPENAI_MODEL_NAME = os.environ.get("AZURE_OPENAI_MODEL_NAME", "gpt-35-turb
 
 SHOULD_STREAM = True if AZURE_OPENAI_STREAM.lower() == "true" else False
 
-# Function to generate embeddings for title and content fields, also used for query embeddings
-def generate_embeddings(text):
-    response = openai.Embedding.create(
-        input=text, engine="test_souha2")
-    embeddings = response['data'][0]['embedding']
-    return embeddings
-
 def is_chat_model():
     if 'gpt-4' in AZURE_OPENAI_MODEL_NAME.lower() or AZURE_OPENAI_MODEL_NAME.lower() in ['gpt-35-turbo-4k', 'gpt-35-turbo-16k']:
         return True
@@ -62,16 +54,7 @@ def should_use_data():
     return False
 
 def prepare_body_headers_with_data(request):
-    print("PREPARING BODY HEADERS")
     request_messages = request.json["messages"]
-    print("COMPUTING EMBEDDING")
-    embedding = generate_embeddings(request_messages)
-    print("COMPUTED EMBEDDING")
-    vec = Vector(
-        value = embedding,
-        k = 5,
-        fields="contentVector"
-    )
     body = {
         "messages": request_messages,
         "temperature": float(AZURE_OPENAI_TEMPERATURE),
@@ -98,9 +81,6 @@ def prepare_body_headers_with_data(request):
                     "queryLanguage": "fr-fr",
                     "semanticConfiguration": AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG if AZURE_SEARCH_USE_SEMANTIC_SEARCH.lower() == "true" and AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG else "",
                     "roleInformation": AZURE_OPENAI_SYSTEM_MESSAGE,
-                    "answers": "extractive|threshold-0.001|count-3",
-                    "captions": "extractive",
-                    "vector": vec
                 }
             }
         ]
