@@ -69,6 +69,7 @@ def prepare_body_headers_with_data(request):
                     "endpoint": f"https://{AZURE_SEARCH_SERVICE}.search.windows.net",
                     "key": AZURE_SEARCH_KEY,
                     "indexName": AZURE_SEARCH_INDEX,
+                    "version": "2020-06-30-Preview",
                     "fieldsMapping": {
                         "contentField": AZURE_SEARCH_CONTENT_COLUMNS.split("|") if AZURE_SEARCH_CONTENT_COLUMNS else [],
                         "titleField": AZURE_SEARCH_TITLE_COLUMN if AZURE_SEARCH_TITLE_COLUMN else None,
@@ -84,7 +85,6 @@ def prepare_body_headers_with_data(request):
                     "roleInformation": AZURE_OPENAI_SYSTEM_MESSAGE,
                     "answers": "extractive|threshold-0.001",
                     "captions": "extractive",
-                    "searchFields":"title,content"
                 }
             }
         ]
