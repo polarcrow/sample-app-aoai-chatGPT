@@ -82,7 +82,8 @@ def prepare_body_headers_with_data(request):
                     "queryLanguage": "fr-fr",
                     "semanticConfiguration": AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG if AZURE_SEARCH_USE_SEMANTIC_SEARCH.lower() == "true" and AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG else "",
                     "roleInformation": AZURE_OPENAI_SYSTEM_MESSAGE,
-                    "answers": "extractive"
+                    "answers": "extractive|threshold-0.001",
+                    "captions": "extractive",
                 }
             }
         ]
