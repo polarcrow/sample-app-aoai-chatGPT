@@ -67,7 +67,8 @@ def prepare_body_headers_with_data(request):
     embedding = generate_embeddings(request_messages)
     vec = Vector(
         value = embedding,
-        k = 5
+        k = 5,
+        fields="contentVector"
     )
     body = {
         "messages": request_messages,
