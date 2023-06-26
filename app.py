@@ -99,7 +99,7 @@ def prepare_body_headers_with_data(request):
                     "semanticConfiguration": AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG if AZURE_SEARCH_USE_SEMANTIC_SEARCH.lower() == "true" and AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG else "",
                     "roleInformation": AZURE_OPENAI_SYSTEM_MESSAGE,
                     #"vector": vec,
-                    "answers": "extractive
+                    "answers": "extractive"
                 }
             }
         ]
